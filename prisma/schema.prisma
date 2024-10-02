@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Appointment {
+  id           String   @id @default(uuid())
+  date         String
+  hour         String
+  is_confirmed Boolean? @default(false)
+
+  client   Client? @relation(fields: [clientId], references: [id])
+  clientId String?
+
+  service   Service? @relation(fields: [serviceId], references: [id])
+  serviceId String?
+
+  created_at DateTime @default(now())
+
+  @@map("appointments")
+}
+
+model Client {
+  id          String        @id @default(uuid())
+  name        String
+  whatsapp    String
+  email       String?
+  Appointment Appointment[]
+  created_at  DateTime      @default(now())
+
+  @@map("clients")
+}
+
+model Service {
+  id          String        @id @default(uuid())
+  name        String
+  amount      String
+  Appointment Appointment[]
+
+  company   Company? @relation(fields: [companyId], references: [id])
+  companyId String?
+
+  created_at DateTime @default(now())
+
+  @@map("services")
+}
+
+model Company {
+  id                 String  @id @default(uuid())
+  name               String
+  address            String
+  link               String
+  showAmountServices Boolean
+
+  Service  Service[]
+  Schedule Schedule[]
+
+  created_at DateTime @default(now())
+
+  @@map("companies")
+}
+
+model Schedule {
+  id            String  @id @default(uuid())
+  date          String
+  hour          String
+  isMarkedToUse Boolean
+
+  company   Company @relation(fields: [companyId], references: [id])
+  companyId String
+
+  @@map("schedules")
+}
